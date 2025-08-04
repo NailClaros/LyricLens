@@ -1,6 +1,8 @@
 import requests
 import json
 import os
+import html
+
 
 nkey = os.getenv('key_n')
 hkey = os.getenv('key_h')
@@ -31,36 +33,51 @@ def detect(text):
 
     return "MUL", "Made up Language/gibberish"
 
+def translate(text: str, lang: str, og_lang:str) -> str:
+    CHUNK_SIZE = 1000
+    translated_parts = []
 
+    code = ""
+    for k, v in languages_dict.items():
+        if og_lang.lower() == v.lower():
+            code = k
 
+    for start in range(0, len(text), CHUNK_SIZE):
+        chunk = text[start : start + CHUNK_SIZE]
+        try:
+            url = "https://deep-translate1.p.rapidapi.com/language/translate/v2"
+            payload = {
+                "q": str(chunk),
+                "source": code,
+                "target": str(lang),
+                "format": "text"
+            }
+            headers = {
+                "x-rapidapi-key": nkey,
+                "x-rapidapi-host": "deep-translate1.p.rapidapi.com",
+                "Content-Type": "application/json"
+            }
 
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            data = json.loads(response.text)
+            # Safe extraction with fallbacks
+            translated_text = data['data']['translations']['translatedText'][0]
 
-def translate(text, lang):
-    if len(text) > 1000:
-        val = ""
-        for x in range(0, len(text), 1000): 
-            val+= translate(text[x:x + 1000], lang=lang)
-    else:
-        url = "https://deep-translate1.p.rapidapi.com/language/translate/v2"
+            if translated_text is None:
+                # Try alternative path if API changed or unexpected
+                # Dump entire response for debugging (could log instead)
+                print("Unexpected translation response shape:", data)
+                translated_text = chunk  # fallback to original
+            translated_text = html.unescape(translated_text)
+            translated_parts.append(str(translated_text))
 
-        payload = {
-            "q": str(text),
-            "source": "auto",
-            "target": str(lang)
-        }
-        headers = {
-            "x-rapidapi-key": nkey,
-            "x-rapidapi-host": "deep-translate1.p.rapidapi.com",
-            "Content-Type": "application/json"
-        }
+        except requests.RequestException as e:
+            print(f"[Warning] Translation API error for chunk starting at {start}: {e}")
+            translated_parts.append(chunk)  # fallback to original chunk
 
-        response = requests.post(url, json=payload, headers=headers)
-
-        print(response.json())
-        ax = json.loads(response.text)
-        
-        return ax['data']['translations']['translatedText']
-    return val
+    return "".join(translated_parts)
 
 ###Title
 ###Coverart
