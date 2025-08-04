@@ -331,10 +331,12 @@ def translations():
 @app.post('/translate')
 def translate():
     data = request.get_json()
+    print(data)
     text = data.get('text')
     lang = data.get('lang')
-
-    translated_text = trans.translate(text=text, lang=lang) 
+    og = data.get('og')
+         
+    translated_text = trans.translate(text=text, lang=lang, og_lang=og) 
 
     return jsonify({'translatedText': translated_text})
 

@@ -72,13 +72,13 @@
             // Update the translation text via AJAX
             function updateTranslation(selectedLang) {
                 const textToTranslate = `{{ lyric }}`;
-    
+                const og_lanf = `{{ lang }}`;
                 if (selectedLang) {
                     $.ajax({
                         url: '/translate',
                         type: 'POST',
                         contentType: 'application/json',
-                        data: JSON.stringify({ text: textToTranslate, lang: selectedLang }),
+                        data: JSON.stringify({ text: textToTranslate, lang: selectedLang, og: og_lanf }),
                         success: function (response) {
                             $('#translation').val(response.translatedText + "\n");
                         },
