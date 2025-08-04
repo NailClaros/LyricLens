@@ -33,7 +33,6 @@ def detect(text):
 
     return "MUL", "Made up Language/gibberish"
 
-
 def translate(text: str, lang: str, og_lang:str) -> str:
     CHUNK_SIZE = 1000
     translated_parts = []
@@ -79,6 +78,7 @@ def translate(text: str, lang: str, og_lang:str) -> str:
             translated_parts.append(chunk)  # fallback to original chunk
 
     return "".join(translated_parts)
+
 ###Title
 ###Coverart
 ###natural lang

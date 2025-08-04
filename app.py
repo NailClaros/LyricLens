@@ -338,6 +338,7 @@ def translate():
          
     translated_text = trans.translate(text=text, lang=lang, og_lang=og) 
 
+
     return jsonify({'translatedText': translated_text})
 
 @app.post('/upload-audio')
